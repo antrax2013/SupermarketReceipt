@@ -9,30 +9,15 @@ public class BundleOffer(List<Product> products)
     {
         List<Product> cartProducts = [.. cart.GetItems().Select(x => x.Product)];
 
-        var notRecogizedProduct = products.FirstOrDefault(product => !cartProducts.Contains(product));
+        var notRecognizedProduct = products.FirstOrDefault(product => !cartProducts.Contains(product));
 
-        if (notRecogizedProduct != null)
+        if (notRecognizedProduct != null)
         {
             return new(null, "aucun discount", 0);
         }
 
-        //foreach (var item in products)
-        //{
-        //    if (!p.Contains(item))
-        //    {
-        //        return new(null, "aucun discount", 0); ;
-        //    }
+        var total = (from p in products select catalog.GetUnitPrice(p)).Sum();
 
-        //}
-
-        //products.Where(p => cart.GetItems().Select(c => c.Product.Name).Contains(p.Name)).Sum(p => p.)
-
-        /*foreach (var item in products)
-        {
-            total += catalog.
-        }*/
-
-
-        return new(products[0], "Bundle", 0.278);
+        return new(products[0], "Bundle", total * 0.10);
     }
 }

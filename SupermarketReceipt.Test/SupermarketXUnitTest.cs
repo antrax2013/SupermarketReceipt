@@ -34,37 +34,4 @@ public class SupermarketXUnitTest
         Assert.Equal(2.5 * 1.99, receiptItem.TotalPrice);
         Assert.Equal(2.5, receiptItem.Quantity);
     }
-
-    [Fact]
-    public void MyTest()
-    {
-        // ARRANGE
-        SupermarketCatalog catalog = new Catalog();
-        var toothbrush = new Product("toothbrush", ProductUnit.Each);
-        catalog.AddProduct(toothbrush, 2);
-        var toothPaste = new Product("toothPaste", ProductUnit.Each);
-        catalog.AddProduct(toothPaste, 1);
-
-        var cart = new ShoppingCart();
-        cart.AddItemQuantity(toothbrush, 1);
-        cart.AddItemQuantity(toothPaste, 1);
-
-        var teller = new Teller(catalog);
-        var bundleOffer = new Offer(SpecialOfferType.Bundle, toothbrush, 20.0, (_) => false);
-        var bundleOffer = new Offer(SpecialOfferType.Bundle, toothPaste, 20.0, (_) => false);
-        teller.AddSpecialOffer(bundleOffer);
-
-        // ACT
-        var receipt = teller.ChecksOutArticlesFrom(cart);
-
-        // ASSERT
-        Assert.Equal(2.60, receipt.GetTotalPrice());
-        //Assert.Equal(new List<Discount>(), receipt.GetDiscounts());
-        //Assert.Single(receipt.GetItems());
-        //var receiptItem = receipt.GetItems()[0];
-        //Assert.Equal(toothPaste, receiptItem.Product);
-        //Assert.Equal(1.99, receiptItem.Price);
-        //Assert.Equal(2.5 * 1.99, receiptItem.TotalPrice);
-        //Assert.Equal(2.5, receiptItem.Quantity);
-    }
 }

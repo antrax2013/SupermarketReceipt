@@ -1,3 +1,5 @@
+using System;
+
 namespace SupermarketReceipt;
 
 public class Discount
@@ -19,7 +21,12 @@ public class Discount
         return discount != null &&
                Product == discount.Product &&
                Description == discount.Description &&
-               DiscountAmount == discount.DiscountAmount
+               Math.Round(DiscountAmount, 4) == Math.Round(discount.DiscountAmount, 4)
                ;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Product, Description, DiscountAmount);
     }
 }

@@ -34,9 +34,6 @@ public class ShoppingCart
         }
     }
 
-
-    //faire une fonction applydiscount
-
     public void HandleOffers(Receipt receipt, Dictionary<Product, Offer> offers, SupermarketCatalog catalog)
     {
         foreach (var p in _productQuantities.Keys)
@@ -47,19 +44,10 @@ public class ShoppingCart
             {
                 var offer = offers[p];
 
-                if (!offer.OfferApply(this))
-                {
-                    continue;
-                }
-
                 var unitPrice = catalog.GetUnitPrice(p);
                 Discount discount = null;
                 var x = 1;
-                if (offer.OfferType == SpecialOfferType.Bundle)
-                {
-                    discount = new Discount(p, offer.Argument + "% off", -quantity * unitPrice * offer.Argument / 100.0);
-                }
-                else if (offer.OfferType == SpecialOfferType.ThreeForTwo)
+                if (offer.OfferType == SpecialOfferType.ThreeForTwo)
                 {
                     x = 3;
                 }

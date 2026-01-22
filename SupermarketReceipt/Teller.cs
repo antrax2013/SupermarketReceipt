@@ -12,17 +12,10 @@ public class Teller
         _catalog = catalog;
     }
 
-    public void AddSpecialOffer(Offer offer)
-    {
-        _offers[offer.GetProduct()] = offer;
-    }
-
     public void AddSpecialOffer(SpecialOfferType offerType, Product product, double argument)
     {
         _offers[product] = new Offer(offerType, product, argument);
     }
-
-
 
     public Receipt ChecksOutArticlesFrom(ShoppingCart theCart)
     {
