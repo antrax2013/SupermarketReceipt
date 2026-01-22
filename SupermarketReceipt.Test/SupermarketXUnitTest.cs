@@ -19,7 +19,7 @@ public class SupermarketXUnitTest
         cart.AddItemQuantity(apples, 2.5);
 
         var teller = new Teller(catalog);
-        teller.AddSpecialOffer(SpecialOfferType.TenPercentDiscount, toothbrush, 10.0);
+        teller.AddSpecialOffer(SpecialOfferType.PercentDiscount, toothbrush, 10.0);
 
         // ACT
         var receipt = teller.ChecksOutArticlesFrom(cart);
@@ -73,13 +73,14 @@ public class SupermarketXUnitTest
     }
 
     [Fact]
-    public void When_There_Are_Only_A_Toothbrush_And_No_Offert_In_Catalog_Then_Receipt_Total_Should_Be_0_99()
+    public void When_There_Are_Only_2_Toothbrushs_And_No_Offert_In_Catalog_Then_Receipt_Total_Should_Be_1_98()
     {
         // ARRANGE
         SupermarketCatalog catalog = new Catalog();
         var toothbrush = new Product("toothbrush", ProductUnit.Each);
         catalog.AddProduct(toothbrush, 0.99);
         var cart = new ShoppingCart();
+        cart.AddItemQuantity(toothbrush, 1);
         cart.AddItemQuantity(toothbrush, 1);
 
         var teller = new Teller(catalog);
@@ -88,15 +89,17 @@ public class SupermarketXUnitTest
         var receipt = teller.ChecksOutArticlesFrom(cart);
 
         // ASSERT
-        Assert.Equal(0.99, receipt.GetTotalPrice());
+        Assert.Equal(1.98, receipt.GetTotalPrice());
     }
 
     [Theory]
-    //[InlineData(SpecialOfferType.TenPercentDiscount, 10, 9)]
-    //[InlineData(SpecialOfferType.FiveForAmount, 10, 20)]
-    //[InlineData(SpecialOfferType.ThreeForTwo, 10, 7)]
-    [InlineData(SpecialOfferType.TwoForAmount, 10, 50)]
-    public void Discount_Should_Have_Valid_Amount(SpecialOfferType offerType, double argument, double expectedValue)
+    [InlineData(SpecialOfferType.PercentDiscount, 10, 10, 9, "10% off")]
+    [InlineData(SpecialOfferType.PercentDiscount, 10, 20, 8, "20% off")]
+    [InlineData(SpecialOfferType.FiveForAmount, 10, 4, 8, "5 for 4.00")]
+    [InlineData(SpecialOfferType.FiveForAmount, 6, 1, 2, "5 for 1.00")]
+    [InlineData(SpecialOfferType.ThreeForTwo, 10, 1, 7, "3 for 2")]
+    [InlineData(SpecialOfferType.TwoForAmount, 10, 1, 5, "2 for 1.00")]
+    public void Discount_Should_Have_Expected_Total_And_DiscountLabel_From_Theories(SpecialOfferType offerType, double quantity, double argument, double expectedTotal, string expectedDiscountLabel)
     {
         // ARRANGE
         SupermarketCatalog catalog = new Catalog();
@@ -104,15 +107,18 @@ public class SupermarketXUnitTest
         catalog.AddProduct(toothbrush, 1);
 
         var cart = new ShoppingCart();
-        cart.AddItemQuantity(toothbrush, 10);
+        cart.AddItemQuantity(toothbrush, quantity);
 
         var teller = new Teller(catalog);
         teller.AddSpecialOffer(offerType, toothbrush, argument);
 
         // ACT
         var receipt = teller.ChecksOutArticlesFrom(cart);
+        var discounts = receipt.GetDiscounts();
 
         // ASSERT
-        Assert.Equal(expectedValue, receipt.GetTotalPrice());
+        Assert.Equal(expectedTotal, receipt.GetTotalPrice());
+        Assert.Single(discounts);
+        Assert.Equal(expectedDiscountLabel, discounts[0].Description);
     }
 }
