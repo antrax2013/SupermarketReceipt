@@ -3,12 +3,11 @@
 namespace SupermarketReceipt.DiscountFor;
 
 public class DiscountTowForAmount(
-    Func<double, string> doubleToPriceLabel,
     Product p,
     double quantity,
     double unitPrice,
-    double argument
-) : ADiscountFor(p, doubleToPriceLabel, quantity)
+    double argument,
+    Func<double, string> doubleToPriceLabel) : ADiscountFor(p, quantity, doubleToPriceLabel)
 {
 
     protected override double GetDiscountValue()

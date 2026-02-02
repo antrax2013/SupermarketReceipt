@@ -2,7 +2,7 @@
 
 namespace SupermarketReceipt.DiscountFor;
 
-public abstract class ADiscountFor(Product product, Func<double, string> doubleToPriceLabel, double quantity)
+public abstract class ADiscountFor(Product product, double quantity, Func<double, string> doubleToPriceLabel = null)
 {
     internal readonly Product product = product;
     internal readonly Func<double, string> doubleToPriceLabel = doubleToPriceLabel;

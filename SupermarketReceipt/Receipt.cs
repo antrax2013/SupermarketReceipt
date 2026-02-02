@@ -20,19 +20,19 @@ public class Receipt
         _items.Add(new ReceiptItem(p, quantity, price, totalPrice));
     }
 
-    public List<ReceiptItem> GetItems()
+    public List<ReceiptItem> GetReadOnlyItems()
     {
-        return new List<ReceiptItem>(_items);
+        return [.. _items];
     }
 
-    public void AddDiscount(Discount discount)
+    public void AddDiscounts(IEnumerable<Discount> discounts)
     {
-        _discounts.Add(discount);
+        _discounts.AddRange(discounts);
     }
 
-    public List<Discount> GetDiscounts()
+    public IReadOnlyList<Discount> GetReadOnlyDiscounts()
     {
-        return _discounts;
+        return [.. _discounts];
     }
 }
 

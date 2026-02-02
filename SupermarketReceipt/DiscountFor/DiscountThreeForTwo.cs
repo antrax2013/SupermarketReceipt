@@ -1,24 +1,22 @@
-﻿using System;
-
-namespace SupermarketReceipt.DiscountFor;
+﻿namespace SupermarketReceipt.DiscountFor;
 
 public class DiscountThreeForTwo(
-    Func<double, string> doubleToPriceLabel,
     Product p,
     double quantity,
     double unitPrice
-) : ADiscountFor(p, doubleToPriceLabel, quantity)
+) : ADiscountFor(p, quantity, null)
 {
+    private const int threshold = 3;
 
     protected override bool CanApplyDiscount()
     {
-        return QuantityAsInt > 2;
+        return QuantityAsInt > (threshold - 1);
     }
 
     protected override double GetDiscountValue()
     {
-        var numberOfXs = QuantityAsInt / 3;
-        return quantity * unitPrice - (numberOfXs * 2 * unitPrice + QuantityAsInt % 3 * unitPrice);
+        var numberOfXs = QuantityAsInt / threshold;
+        return quantity * unitPrice - (numberOfXs * (threshold - 1) * unitPrice + QuantityAsInt % threshold * unitPrice);
     }
 
     protected override string GetDiscountLabel()

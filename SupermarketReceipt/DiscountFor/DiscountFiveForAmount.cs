@@ -3,26 +3,27 @@
 namespace SupermarketReceipt.DiscountFor;
 
 public class DiscountFiveForAmount(
-    Func<double, string> doubleToPriceLabel,
     Product p,
     double quantity,
     double unitPrice,
-    double argument
-) : ADiscountFor(p, doubleToPriceLabel, quantity)
+    double argument,
+    Func<double, string> doubleToPriceLabel) : ADiscountFor(p, quantity, doubleToPriceLabel)
 {
+    private const int threshold = 5;
+
     protected override bool CanApplyDiscount()
     {
-        return QuantityAsInt >= 5;
+        return QuantityAsInt >= threshold;
     }
 
     protected override double GetDiscountValue()
     {
-        var numberOfXs = QuantityAsInt / 5;
-        return unitPrice * quantity - (argument * numberOfXs + QuantityAsInt % 5 * unitPrice);
+        var numberOfXs = QuantityAsInt / threshold;
+        return unitPrice * quantity - (argument * numberOfXs + QuantityAsInt % threshold * unitPrice);
     }
 
     protected override string GetDiscountLabel()
     {
-        return "5 for " + doubleToPriceLabel(argument);
+        return $"{threshold} for " + doubleToPriceLabel(argument);
     }
 }

@@ -1,3 +1,4 @@
+using SupermarketReceipt.Offer;
 using System.Collections.Generic;
 using Xunit;
 
@@ -26,9 +27,9 @@ public class SupermarketXUnitTest
 
         // ASSERT
         Assert.Equal(4.975, receipt.GetTotalPrice());
-        Assert.Equal(new List<Discount>(), receipt.GetDiscounts());
-        Assert.Single(receipt.GetItems());
-        var receiptItem = receipt.GetItems()[0];
+        Assert.Equal(new List<Discount>(), receipt.GetReadOnlyDiscounts());
+        Assert.Single(receipt.GetReadOnlyItems());
+        var receiptItem = receipt.GetReadOnlyItems()[0];
         Assert.Equal(apples, receiptItem.Product);
         Assert.Equal(1.99, receiptItem.Price);
         Assert.Equal(2.5 * 1.99, receiptItem.TotalPrice);
@@ -114,11 +115,97 @@ public class SupermarketXUnitTest
 
         // ACT
         var receipt = teller.ChecksOutArticlesFrom(cart);
-        var discounts = receipt.GetDiscounts();
+        var discounts = receipt.GetReadOnlyDiscounts();
 
         // ASSERT
         Assert.Equal(expectedTotal, receipt.GetTotalPrice());
         Assert.Single(discounts);
         Assert.Equal(expectedDiscountLabel, discounts[0].Description);
     }
+
+    [Fact]
+    public void Discount_Should_Have_Expected_Total_And_DiscountLabel_Computed_From_BundleOffer()
+    {
+        // ARRANGE
+        SupermarketCatalog catalog = new Catalog();
+        var toothbrush = new Product("toothbrush", ProductUnit.Each);
+        var toothpaste = new Product("toothpaste", ProductUnit.Each);
+        catalog.AddProduct(toothbrush, 1);
+        catalog.AddProduct(toothpaste, 2);
+
+        var cart = new ShoppingCart();
+        cart.AddItemQuantity(toothbrush, 1);
+        cart.AddItemQuantity(toothpaste, 1);
+
+        var teller = new Teller(catalog);
+        teller.AddBundleOffer([toothbrush, toothpaste], 10);
+
+        // ACT
+        var receipt = teller.ChecksOutArticlesFrom(cart);
+        var discounts = receipt.GetReadOnlyDiscounts();
+
+        // ASSERT
+        Assert.Equal(2.7, receipt.GetTotalPrice());
+        Assert.Single(discounts);
+        Assert.Equal("10% off on 1 toothbrush & 1 toothpaste", discounts[0].Description);
+    }
+
+    [Fact]
+    public void Discount_Should_Have_Expected_Total_And_DiscountLabel_Computed_From_A_Complted_BundleOffer_And_A_ToothBrush()
+    {
+        // ARRANGE
+        SupermarketCatalog catalog = new Catalog();
+        var toothbrush = new Product("toothbrush", ProductUnit.Each);
+        var toothpaste = new Product("toothpaste", ProductUnit.Each);
+        catalog.AddProduct(toothbrush, 1);
+        catalog.AddProduct(toothpaste, 2);
+
+        var cart = new ShoppingCart();
+        cart.AddItemQuantity(toothbrush, 2);
+        cart.AddItemQuantity(toothpaste, 1);
+
+        var teller = new Teller(catalog);
+        teller.AddBundleOffer([toothbrush, toothpaste], 10);
+
+        // ACT
+        var receipt = teller.ChecksOutArticlesFrom(cart);
+        var discounts = receipt.GetReadOnlyDiscounts();
+
+        // ASSERT
+        Assert.Equal(3.7, receipt.GetTotalPrice());
+        Assert.Single(discounts);
+        Assert.Equal("10% off on 1 toothbrush & 1 toothpaste", discounts[0].Description);
+    }
+
+    /*[Fact]
+    public void Discount_Should_Have_Expected_Total_And_DiscountLabel_Computed_From_A_Complted_BundleOffer_And_A_ToothBrush_With_10_Percent()
+    {
+        // ARRANGE
+        SupermarketCatalog catalog = new Catalog();
+        var toothbrush = new Product("toothbrush", ProductUnit.Each);
+        var toothPaste = new Product("toothpaste", ProductUnit.Each);
+        catalog.AddProduct(toothbrush, 1);
+        catalog.AddProduct(toothPaste, 2);
+
+        var cart = new ShoppingCart();
+        cart.AddItemQuantity(toothbrush, 2);
+        cart.AddItemQuantity(toothPaste, 1);
+
+        var teller = new Teller(catalog);
+        teller.AddBundleOffer([toothbrush, toothPaste], 10);
+        teller.AddSpecialOffer(SpecialOfferType.PercentDiscount, toothbrush, 10);
+
+        // ACT
+        var receipt = teller.ChecksOutArticlesFrom(cart);
+        var discounts = receipt.GetReadOnlyDiscounts();
+
+        // ASSERT
+        Assert.Equal(3.6, receipt.GetTotalPrice());
+        Assert.Equal("10% off on 1 toothbrush & 1 toothpaste", discounts[0].Description);
+        Assert.Equal("10% off", discounts[1].Description);
+        Assert.Collection(discounts,
+            discount => Assert.Equal("10% off on 1 toothbrush & 1 toothpaste", discount.Description),
+            discount => Assert.Equal("10% off", discount.Description)
+        );
+    }*/
 }
