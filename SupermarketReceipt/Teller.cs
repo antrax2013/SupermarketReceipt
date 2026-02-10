@@ -6,6 +6,7 @@ public class Teller
 {
     private readonly SupermarketCatalog _catalog;
     private readonly Dictionary<Product, Offer> _offers = new Dictionary<Product, Offer>();
+    private readonly List<IOffer> _extraOffers = [];
 
     public Teller(SupermarketCatalog catalog)
     {
@@ -15,6 +16,11 @@ public class Teller
     public void AddSpecialOffer(SpecialOfferType offerType, Product product, double argument)
     {
         _offers[product] = new Offer(offerType, product, argument);
+    }
+
+    public void AddSpecialOffer(IOffer offer)
+    {
+        _extraOffers.Add(offer);
     }
 
     public Receipt ChecksOutArticlesFrom(ShoppingCart theCart)

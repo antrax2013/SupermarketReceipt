@@ -34,4 +34,32 @@ public class SupermarketXUnitTest
         Assert.Equal(2.5 * 1.99, receiptItem.TotalPrice);
         Assert.Equal(2.5, receiptItem.Quantity);
     }
+
+    //[Fact]
+    /*public void BundleDiscount()
+    {
+        // ARRANGE
+        SupermarketCatalog catalog = new Catalog();
+        var toothbrush = new Product("toothbrush", ProductUnit.Each);
+        var toothPaste = new Product("toothPaste", ProductUnit.Each);
+        catalog.AddProduct(toothPaste, 0.99);
+        catalog.AddProduct(toothbrush, 1.79);
+
+        var cart = new ShoppingCart();
+        cart.AddItemQuantity(toothbrush, 1);
+        cart.AddItemQuantity(toothPaste, 1);
+
+        var teller = new Teller(catalog);
+        BundleOffer bundleOffer = new([toothPaste, toothPaste]);
+        teller.AddSpecialOffer(bundleOffer);
+
+        // ACT
+        var receipt = teller.ChecksOutArticlesFrom(cart);
+
+        // ASSERT
+        var actualDiscounts = receipt.GetDiscounts();
+
+        Assert.Contains(new(toothbrush, "Bundle", 0.099), actualDiscounts);
+        Assert.Contains(new(toothPaste, "Bundle", 0.179), actualDiscounts);
+    }*/
 }

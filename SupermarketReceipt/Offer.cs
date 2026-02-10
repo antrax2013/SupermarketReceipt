@@ -1,5 +1,3 @@
-using System;
-
 namespace SupermarketReceipt;
 
 public enum SpecialOfferType
@@ -14,26 +12,17 @@ public enum SpecialOfferType
 public class Offer
 {
     private Product _product;
-    private Func<ShoppingCart, bool>? _offerApply = null;
-
-    public bool OfferApply(ShoppingCart cart)
-    {
-        if (_offerApply == null)
-            return true;
-        return _offerApply(cart);
-    }
 
     public Product GetProduct()
     {
         return _product;
     }
 
-    public Offer(SpecialOfferType offerType, Product product, double argument, Func<ShoppingCart, bool>? OfferApply = null)
+    public Offer(SpecialOfferType offerType, Product product, double argument)
     {
         OfferType = offerType;
         Argument = argument;
         _product = product;
-        _offerApply = OfferApply;
     }
 
     public SpecialOfferType OfferType { get; }

@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Collections.Generic;
+using Xunit;
 using Assert = Xunit.Assert;
 
 namespace SupermarketReceipt.Test;
@@ -7,17 +8,16 @@ public class BundleOfferTests
 {
 
     [Fact]
-    public void BundleTest()
+    public void BundleAppliesDiscount()
     {
         // Given
-        Catalog catalog = new();
+        SupermarketCatalog catalog = new Catalog();
         var toothbrush = new Product("toothbrush", ProductUnit.Each);
         var toothPaste = new Product("toothPaste", ProductUnit.Each);
-        catalog.AddProduct(toothPaste, 0.99);
         catalog.AddProduct(toothbrush, 1.79);
+        catalog.AddProduct(toothPaste, 0.99);
 
         ShoppingCart cart = new();
-        Discount expectedDicount = new(toothPaste, "Bundle", 0.278);
 
         cart.AddItemQuantity(toothbrush, 1);
         cart.AddItemQuantity(toothPaste, 1);
@@ -25,34 +25,37 @@ public class BundleOfferTests
         BundleOffer bundleOffer = new([toothPaste, toothbrush]);
 
         // When
-        Discount discount = bundleOffer.GetDiscountFor(cart, catalog);
+        List<Discount> actualDiscounts = bundleOffer.GetDiscountsFor(cart, catalog);
 
         // Then
-        Assert.Equal(discount, expectedDicount);
+        Assert.Contains(new(toothbrush, "Bundle", 0.179), actualDiscounts);
+        Assert.Contains(new(toothPaste, "Bundle", 0.099), actualDiscounts);
     }
 
     [Fact]
-    public void BundleTest2()
+    public void ProductQuantities()
     {
         // Given
-        Catalog catalog = new();
-        var mirror = new Product("mirror", ProductUnit.Each);
+        SupermarketCatalog catalog = new Catalog();
+        var toothbrush = new Product("toothbrush", ProductUnit.Each);
         var toothPaste = new Product("toothPaste", ProductUnit.Each);
+        catalog.AddProduct(toothbrush, 1.79);
         catalog.AddProduct(toothPaste, 0.99);
-        catalog.AddProduct(mirror, 2);
 
         ShoppingCart cart = new();
-        Discount expectedDicount = new(toothPaste, "Bundle", 0.299);
 
-        cart.AddItemQuantity(mirror, 1);
+        cart.AddItemQuantity(toothbrush, 1);
+        cart.AddItemQuantity(toothPaste, 1);
         cart.AddItemQuantity(toothPaste, 1);
 
-        BundleOffer bundleOffer = new([toothPaste, mirror]);
+        BundleOffer bundleOffer = new([toothPaste, toothbrush]);
 
         // When
-        Discount discount = bundleOffer.GetDiscountFor(cart, catalog);
+        List<Discount> actualDiscounts = bundleOffer.GetDiscountsFor(cart, catalog);
 
         // Then
-        Assert.Equal(discount, expectedDicount);
+        Assert.Equal(2, actualDiscounts.Count);
+        Assert.Contains(new(toothbrush, "Bundle", 0.179), actualDiscounts);
+        Assert.Contains(new(toothPaste, "Bundle", 0.198), actualDiscounts);
     }
 }

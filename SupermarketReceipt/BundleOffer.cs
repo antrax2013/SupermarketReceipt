@@ -3,21 +3,32 @@ using System.Linq;
 
 namespace SupermarketReceipt;
 
-public class BundleOffer(List<Product> products)
+public class BundleOffer(List<Product> products) : IOffer
 {
-    public Discount GetDiscountFor(ShoppingCart cart, Catalog catalog)
+    public List<Discount> GetDiscountsFor(ShoppingCart cart, SupermarketCatalog catalog)
     {
-        List<Product> cartProducts = [.. cart.GetItems().Select(x => x.Product)];
+        List<Discount> discounts = [];
 
-        var notRecognizedProduct = products.FirstOrDefault(product => !cartProducts.Contains(product));
-
-        if (notRecognizedProduct != null)
+        if (AllProductsInCart(cart))
         {
-            return new(null, "aucun discount", 0);
+            foreach (Product product in products)
+            {
+                var quantity = cart.GetItems().First(x => x.Product.Equals(product)).Quantity;
+                var discountValue = catalog.GetUnitPrice(product) * quantity * 0.10;
+                var discount = new Discount(product, "Bundle", discountValue);
+
+                discounts.Add(discount);
+            }
         }
 
-        var total = (from p in products select catalog.GetUnitPrice(p)).Sum();
+        return discounts;
+    }
 
-        return new(products[0], "Bundle", total * 0.10);
+    public bool AllProductsInCart(ShoppingCart cart)
+    {
+        List<Product> cartProducts = [.. cart.GetItems().Select(x => x.Product)];
+        bool allProductsInCart = products.All(p => cartProducts.Contains(p));
+
+        return allProductsInCart;
     }
 }
