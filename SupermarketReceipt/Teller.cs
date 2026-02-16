@@ -36,6 +36,10 @@ public class Teller
             receipt.AddProduct(p, quantity, unitPrice, price);
         }
 
+        //Extra offers
+        theCart.HandleExtraOffers(receipt, _extraOffers, _catalog);
+
+        // Others offers
         theCart.HandleOffers(receipt, _offers, _catalog);
 
         return receipt;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -86,5 +87,10 @@ public class ShoppingCart
     private string PrintPrice(double price)
     {
         return price.ToString("N2", Culture);
+    }
+
+    internal void HandleExtraOffers(Receipt receipt, List<IOffer> extraOffers, SupermarketCatalog catalog)
+    {
+        throw new NotImplementedException();
     }
 }
