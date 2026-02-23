@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -41,6 +40,11 @@ public class ShoppingCart
         {
             var quantity = _productQuantities[p];
             var quantityAsInt = (int)quantity;
+
+            if (quantityAsInt == 0)
+                continue;
+
+
             if (offers.ContainsKey(p))
             {
                 var offer = offers[p];
@@ -91,6 +95,17 @@ public class ShoppingCart
 
     internal void HandleExtraOffers(Receipt receipt, List<IOffer> extraOffers, SupermarketCatalog catalog)
     {
-        throw new NotImplementedException();
+        extraOffers.ForEach(extraOffers =>
+        {
+            var discounts = extraOffers.GetDiscountsFor(this, catalog);
+            discounts.ForEach(discount =>
+            {
+                receipt.AddDiscount(discount);
+            });
+            extraOffers.GetDiscountsProducts().ForEach(productQuantity =>
+            {
+                _productQuantities[productQuantity.Product] -= productQuantity.Quantity;
+            });
+        });
     }
 }

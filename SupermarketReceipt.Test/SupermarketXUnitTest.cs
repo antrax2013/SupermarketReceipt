@@ -129,8 +129,6 @@ public class SupermarketXUnitTest
             actualDiscount => Assert.Equal(expectedDiscount, actualDiscount)
         );
 
-
-        Assert.Equal(1.78, receipt.GetTotalPrice(), 0.1);
         Assert.Collection(receipt.GetItems(),
             receiptItem =>
             {
@@ -174,8 +172,6 @@ public class SupermarketXUnitTest
             actualDiscount => Assert.Equal(expectedDiscount, actualDiscount)
         );
 
-
-        Assert.Equal(1.78, receipt.GetTotalPrice(), 0.1);
         Assert.Collection(receipt.GetItems(),
             receiptItem =>
             {
@@ -193,41 +189,94 @@ public class SupermarketXUnitTest
     }
 
     [Fact]
-    public void BundleDiscount()
+    public void Should_Apply_1_BundleDiscount()
     {
         // ARRANGE
         SupermarketCatalog catalog = new Catalog();
         var toothbrush = new Product("toothbrush", ProductUnit.Each);
-        var toothPaste = new Product("toothPaste", ProductUnit.Each);
+        var toothpaste = new Product("toothpaste", ProductUnit.Each);
         catalog.AddProduct(toothbrush, 1.79);
-        catalog.AddProduct(toothPaste, 0.99);
-
+        catalog.AddProduct(toothpaste, 0.99);
 
         var cart = new ShoppingCart();
         cart.AddItem(toothbrush);
-        cart.AddItem(toothPaste);
+        cart.AddItem(toothpaste);
 
         var teller = new Teller(catalog);
-        BundleOffer bundleOffer = new([toothPaste, toothPaste]);
+        BundleOffer bundleOffer = new([
+            new ProductQuantity(toothbrush, 1),
+            new ProductQuantity(toothpaste, 1),
+        ]);
         teller.AddSpecialOffer(bundleOffer);
 
         // ACT
         var receipt = teller.ChecksOutArticlesFrom(cart);
 
         // ASSERT
-        Assert.Equal(2.6, receipt.GetTotalPrice(), 0.1);
+        Assert.Equal(2.502, receipt.GetTotalPrice(), 0.1);
 
         Assert.Collection(receipt.GetDiscounts(),
-            actualDiscount => Assert.Equal(new(toothbrush, "Bundle", 0.099), actualDiscount),
-            actualDiscount => Assert.Equal(new(toothPaste, "Bundle", 0.179), actualDiscount)
+            actualDiscount => Assert.Equal(new(toothbrush, "Bundle", -0.179), actualDiscount),
+            actualDiscount => Assert.Equal(new(toothpaste, "Bundle", -0.099), actualDiscount)
         );
 
-        Assert.Equal(1.78, receipt.GetTotalPrice(), 0.1);
         Assert.Collection(receipt.GetItems(),
+            receiptItem =>
+            {
+                Assert.Equal(1.79, receiptItem.Price, 0.1);
+                Assert.Equal(1.79, receiptItem.TotalPrice, 0.1);
+                Assert.Equal(1, receiptItem.Quantity, 0.1);
+            },
             receiptItem =>
             {
                 Assert.Equal(0.99, receiptItem.Price, 0.1);
                 Assert.Equal(0.99, receiptItem.TotalPrice, 0.1);
+                Assert.Equal(1, receiptItem.Quantity, 0.1);
+            }
+        );
+    }
+
+    [Fact]
+    public void Should_Apply_1_Bundle_And_TenPercent_Discounts()
+    {
+        // ARRANGE
+        SupermarketCatalog catalog = new Catalog();
+        var toothbrush = new Product("toothbrush", ProductUnit.Each);
+        var toothpaste = new Product("toothpaste", ProductUnit.Each);
+        catalog.AddProduct(toothbrush, 1.79);
+        catalog.AddProduct(toothpaste, 0.99);
+
+        var cart = new ShoppingCart();
+        cart.AddItem(toothbrush);
+        cart.AddItem(toothbrush);
+        cart.AddItem(toothpaste);
+
+        var teller = new Teller(catalog);
+        BundleOffer bundleOffer = new([
+            new ProductQuantity(toothbrush, 1),
+            new ProductQuantity(toothpaste, 1),
+        ]);
+        teller.AddSpecialOffer(bundleOffer);
+
+        teller.AddSpecialOffer(SpecialOfferType.TenPercentDiscount, toothbrush, 10.0);
+
+        // ACT
+        var receipt = teller.ChecksOutArticlesFrom(cart);
+
+        // ASSERT
+        Assert.Collection(receipt.GetDiscounts(),
+            actualDiscount => Assert.Equal(new(toothbrush, "Bundle", -0.179), actualDiscount),
+            actualDiscount => Assert.Equal(new(toothpaste, "Bundle", -0.099), actualDiscount),
+            actualDiscount => Assert.Equal(new(toothbrush, "10% off", -0.179), actualDiscount)
+        );
+
+        Assert.Equal(4.113, receipt.GetTotalPrice(), 0.1);
+
+        Assert.Collection(receipt.GetItems(),
+            receiptItem =>
+            {
+                Assert.Equal(1.79, receiptItem.Price, 0.1);
+                Assert.Equal(1.79, receiptItem.TotalPrice, 0.1);
                 Assert.Equal(1, receiptItem.Quantity, 0.1);
             },
             receiptItem =>
@@ -235,6 +284,111 @@ public class SupermarketXUnitTest
                 Assert.Equal(1.79, receiptItem.Price, 0.1);
                 Assert.Equal(1.79, receiptItem.TotalPrice, 0.1);
                 Assert.Equal(1, receiptItem.Quantity, 0.1);
+            },
+            receiptItem =>
+            {
+                Assert.Equal(0.99, receiptItem.Price, 0.1);
+                Assert.Equal(0.99, receiptItem.TotalPrice, 0.1);
+                Assert.Equal(1, receiptItem.Quantity, 0.1);
+            }
+        );
+    }
+
+    [Fact]
+    public void Should_Apply_2_Bundles()
+    {
+        // ARRANGE
+        SupermarketCatalog catalog = new Catalog();
+        var toothbrush = new Product("toothbrush", ProductUnit.Each);
+        var toothpaste = new Product("toothpaste", ProductUnit.Each);
+        catalog.AddProduct(toothbrush, 1.79);
+        catalog.AddProduct(toothpaste, 0.99);
+
+        var cart = new ShoppingCart();
+        cart.AddItemQuantity(toothbrush, 2);
+        cart.AddItemQuantity(toothpaste, 2);
+
+        var teller = new Teller(catalog);
+        BundleOffer bundleOffer = new([
+            new ProductQuantity(toothbrush, 1),
+            new ProductQuantity(toothpaste, 1),
+        ]);
+        teller.AddSpecialOffer(bundleOffer);
+
+        // ACT
+        var receipt = teller.ChecksOutArticlesFrom(cart);
+
+        // ASSERT
+        Assert.Collection(receipt.GetDiscounts(),
+            actualDiscount => Assert.Equal(new(toothbrush, "Bundle", -0.358), actualDiscount),
+            actualDiscount => Assert.Equal(new(toothpaste, "Bundle", -0.198), actualDiscount)
+        );
+
+        Assert.Equal(5.004, receipt.GetTotalPrice(), 0.1);
+
+        Assert.Collection(receipt.GetItems(),
+            receiptItem =>
+            {
+                Assert.Equal(1.79, receiptItem.Price, 0.1);
+                Assert.Equal(3.58, receiptItem.TotalPrice, 0.1);
+                Assert.Equal(2, receiptItem.Quantity, 0.1);
+            },
+            receiptItem =>
+            {
+                Assert.Equal(0.99, receiptItem.Price, 0.1);
+                Assert.Equal(1.98, receiptItem.TotalPrice, 0.1);
+                Assert.Equal(2, receiptItem.Quantity, 0.1);
+            }
+        );
+    }
+
+    [Fact]
+    public void Should_Apply_Bundles_And_TenPercent_Discounts()
+    {
+        // ARRANGE
+        SupermarketCatalog catalog = new Catalog();
+        var toothbrush = new Product("toothbrush", ProductUnit.Each);
+        var toothpaste = new Product("toothpaste", ProductUnit.Each);
+        catalog.AddProduct(toothbrush, 1.79);
+        catalog.AddProduct(toothpaste, 0.99);
+
+        var cart = new ShoppingCart();
+        cart.AddItemQuantity(toothbrush, 3);
+        cart.AddItemQuantity(toothpaste, 2);
+
+        var teller = new Teller(catalog);
+        BundleOffer bundleOffer = new([
+            new ProductQuantity(toothbrush, 1),
+            new ProductQuantity(toothpaste, 1),
+        ]);
+        teller.AddSpecialOffer(bundleOffer);
+
+        teller.AddSpecialOffer(SpecialOfferType.TenPercentDiscount, toothbrush, 10.0);
+
+        // ACT
+        var receipt = teller.ChecksOutArticlesFrom(cart);
+
+        // ASSERT
+        Assert.Collection(receipt.GetDiscounts(),
+            actualDiscount => Assert.Equal(new(toothbrush, "Bundle", -0.358), actualDiscount),
+            actualDiscount => Assert.Equal(new(toothpaste, "Bundle", -0.198), actualDiscount),
+            actualDiscount => Assert.Equal(new(toothbrush, "10% off", -0.179), actualDiscount)
+        );
+
+        Assert.Equal(6.615, receipt.GetTotalPrice(), 0.1);
+
+        Assert.Collection(receipt.GetItems(),
+            receiptItem =>
+            {
+                Assert.Equal(1.79, receiptItem.Price, 0.1);
+                Assert.Equal(5.37, receiptItem.TotalPrice, 0.1);
+                Assert.Equal(3, receiptItem.Quantity, 0.1);
+            },
+            receiptItem =>
+            {
+                Assert.Equal(0.99, receiptItem.Price, 0.1);
+                Assert.Equal(1.98, receiptItem.TotalPrice, 0.1);
+                Assert.Equal(2, receiptItem.Quantity, 0.1);
             }
         );
     }

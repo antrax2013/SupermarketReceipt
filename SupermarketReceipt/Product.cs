@@ -40,6 +40,12 @@ public class ProductQuantity
 
     public Product Product { get; }
     public double Quantity { get; }
+
+    public void Deconstruct(out Product product, out double quantity)
+    {
+        product = Product;
+        quantity = Quantity;
+    }
 }
 
 public enum ProductUnit
